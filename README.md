@@ -41,7 +41,8 @@ First Row:
 6) "Rtn to Start" CV input, when sent a high state from a trigger, returns your midi player to the beginning.
 Second Row:
 1) "Clock out" is a clock out trigger to sync other sequencers to the Midi Player.  Right click context menu can select clock out multiplier.
-2, 3 4) CV inputs that go to the button above it.
+
+2, 3, 4) CV inputs that go to the button above it.
 5) "EOC" is END OF CYCLE".  It is a CV output that sends  a trigger at the end of the play cycle for external syncing.
 
 
