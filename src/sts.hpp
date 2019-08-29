@@ -16,7 +16,7 @@ extern Model *modelLFOPoly;
 extern Model *modelLFOPolySP;
 //extern Model *modelChords;
 extern Model *modelMidiPlayer;
-extern Model *modelDrumMap;
+//extern Model *modelDrumMap;
 //namespace GTX {	
 //namespace Chords  { extern Model *model; }
 //}
