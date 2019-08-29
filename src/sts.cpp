@@ -19,7 +19,7 @@ void init(rack::Plugin *p)
 	//p->addModel(modelChords);
 	//p->addModel(GTX::Chords ::model);
 	p->addModel(modelMidiPlayer);
-	p->addModel(modelDrumMap);
+	//p->addModel(modelDrumMap);
 	
 	
 
