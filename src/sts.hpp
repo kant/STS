@@ -17,12 +17,6 @@ extern Model *modelLFOPolySP;
 //extern Model *modelChords;
 extern Model *modelMidiPlayer;
 //extern Model *modelDrumMap;
-<<<<<<< HEAD
-=======
-//namespace GTX {	
-//namespace Chords  { extern Model *model; }
-//}
->>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
 
 #define MAX_POLY_CHANNELS 16
 #define GTX__N 16

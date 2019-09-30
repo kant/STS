@@ -16,14 +16,7 @@ void init(rack::Plugin *p)
 	p->addModel(modelVU_Poly);
 	p->addModel(modelLFOPoly);
 	p->addModel(modelLFOPolySP);
-<<<<<<< HEAD
 	p->addModel(modelMidiPlayer);
-=======
-	//p->addModel(modelChords);
-	//p->addModel(GTX::Chords ::model);
-	p->addModel(modelMidiPlayer);
-	//p->addModel(modelDrumMap);
->>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
 	
 	
 

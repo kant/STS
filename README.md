@@ -1,15 +1,12 @@
-<<<<<<< HEAD
-=======
+
 V1.1.2
 
 Added Tempo control to MidiPlayerplus.   Output clock follows tempo contol setting.
 
->>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
 V1.1.1
 
 Fixed SVG in Wavefolder module.
 
-<<<<<<< HEAD
 And  ............
 
 Introducing Midi Player, a collaboration between STS and RCM:
