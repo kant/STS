@@ -9,7 +9,6 @@ struct Illiad : Module
 		OCTAVE_PARAM,
 		PORTA_PARAM,
 		PITCHBEND_PARAM,
-
 		ENUMS(OFFSET_PARAM, 35),
 		ENUMS(SLIDER_PARAM, 35),
 		ENUMS(SWITCH_PARAM, 23),
@@ -24,7 +23,6 @@ struct Illiad : Module
 	{
 		// Sliders
 		ENUMS(OUT_OUTPUT, 35),
-
 		// Pitch,Ports,Octave
 		OUT1_OUTPUT_OCTAVE,
 		OUT1_OUTPUT_PORTA,

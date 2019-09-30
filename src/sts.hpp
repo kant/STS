@@ -1,7 +1,6 @@
 #include "window.hpp"
 #include "rack.hpp"
 
-
 using namespace rack;
 
 extern Plugin *pluginInstance;
@@ -17,10 +16,7 @@ extern Model *modelLFOPoly;
 extern Model *modelLFOPolySP;
 //extern Model *modelChords;
 extern Model *modelMidiPlayer;
-//extern Model *modelSEQEXP;
-namespace GTX {	
-namespace Chords  { extern Model *model; }
-}
+//extern Model *modelDrumMap;
 
 #define MAX_POLY_CHANNELS 16
 #define GTX__N 16
@@ -28,7 +24,7 @@ namespace Chords  { extern Model *model; }
 #define GTX__2PI 6.283185307179586476925
 #define GTX__IO_RADIUS 26.0
 #define GTX__SAVE_SVG 0
-#define GTX__WIDGET()
+//#define GTX__WIDGET()
 
 static constexpr float g_audioPeakVoltage = 10.f;
 static constexpr float g_controlPeakVoltage = 5.f;

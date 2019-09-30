@@ -499,6 +499,7 @@ struct MidiPlayer : Module
         RUN_PARAM,
         LOOP_ON_OFF,
         SCRUB_PARAM,
+        TEMPO_PARAM,
         LOOP_START,
         LOOP_END,
         
@@ -565,7 +566,6 @@ struct MidiPlayer : Module
 
     // No need to save
     bool running = false;
-    double time = 0.f;
     double duration = 0.f;
     long event = 0;
     float applyParamsTimer = 0.f;
@@ -575,6 +575,7 @@ struct MidiPlayer : Module
     bool looping = false;
 
     //
+    std::string tempoText = "--";
 
     int tracks;
     unsigned int lightRefreshCounter = 0;
@@ -582,6 +583,7 @@ struct MidiPlayer : Module
     bool doMidiFileOpen = false;
     bool doMidiFileLoad = false;
     bool fileLoaded = false;
+    float tempoMultiplier = 1.f;
 
     //std::string trackName[16] = {};
     std::string path;
@@ -631,7 +633,7 @@ struct MidiPlayer : Module
         for (int i = 0; i < 16; ++i)
         {
         configParam<midiModeQuantity>(MIDI_MODE +i, 0.0f, 2.0f, 0.0f, "Midi Mode ");
-        //configParam(MIDI_MODE + i, 0.0f, 3.0f, 0.0f, "Midi Mode ");
+        configParam(TEMPO_PARAM, -1.0f, 1.0f, 0.0f, "Tempo ");
         }
         
         onReset();
@@ -670,9 +672,9 @@ struct MidiPlayer : Module
 
     void resetPlayer()
     {
-        time = 0.0;
         event = 0;
-        params[SCRUB_PARAM].setValue(time);
+        params[SCRUB_PARAM].setValue(0.0);
+        tempoMap.setMarkerTo(0.0);
 
         for (auto& playbackTrack : playbackTracks) {
             playbackTrack.midiCV.onReset();
@@ -719,7 +721,7 @@ struct MidiPlayer : Module
         json_object_set_new(rootJ, "running", json_boolean(running));
 
         // time
-        json_object_set_new(rootJ, "time", json_real(time));
+        json_object_set_new(rootJ, "time", json_real(tempoMap.timeMarker));
 
         // event
         json_object_set_new(rootJ, "event", json_integer(event));
@@ -801,8 +803,7 @@ struct MidiPlayer : Module
         // time
         json_t *timeJ = json_object_get(rootJ, "time");
         if (timeJ) {
-            time = json_number_value(timeJ);
-            params[SCRUB_PARAM].setValue(time);
+            params[SCRUB_PARAM].setValue(json_number_value(timeJ));
         }
 
         // event
@@ -897,7 +898,7 @@ struct MidiPlayer : Module
 
             paramQuantities[SCRUB_PARAM]->minValue = 0.f;
             paramQuantities[SCRUB_PARAM]->maxValue = duration;
-            params[SCRUB_PARAM].setValue(time);
+            params[SCRUB_PARAM].setValue(tempoMap.timeMarker);
 
             midifile.joinTracks();
 
@@ -939,19 +940,19 @@ struct MidiPlayer : Module
 
         setTrackOffsetInternal(0);
         running = false;
-        time = 0.0;
         event = 0;
-        params[SCRUB_PARAM].setValue(time);
         loopStartPos = -1;
         loopEndPos = -1;
-        tempoMap.setMarkerTo(time);
+        tempoMap.setMarkerTo(0.0);
+        params[SCRUB_PARAM].setValue(0.0);
     }
 
     // Advances the module by 1 audio frame with duration 1.0 / args.sampleRate
     void process(const ProcessArgs &args) override
     {
         const int track = 0; // midifile was flattened when loaded
-        double sampleTime = args.sampleTime;
+        tempoMultiplier = pow(10.f, params[TEMPO_PARAM].value);
+        double sampleTime = args.sampleTime * tempoMultiplier;
         if (btnLoadMidi.process(params[LOADMIDI_PARAM].value))
         {
             doMidiFileOpen = true;
@@ -974,9 +975,17 @@ struct MidiPlayer : Module
             params[SCRUB_PARAM].setValue(loopStartPos >= 0 ? loopStartPos : 0);
         }
 
-        // Scrub
-        if (fileLoaded && (float)time != params[SCRUB_PARAM].getValue())
+        // Reset player
+        if (resetTrigger.process(params[RESET_PARAM].getValue() + inputs[CV_RESET_INPUT].getVoltage()))
         {
+            resetLight = 1.0f;
+            resetPlayer();
+        }
+
+        // Scrub
+        if (fileLoaded && (float)tempoMap.timeMarker != params[SCRUB_PARAM].getValue())
+        {
+            double time = tempoMap.timeMarker;
             while (time > params[SCRUB_PARAM].getValue() && event > 0) {
                 event--;
                 time = midifile[track][event].seconds;
@@ -985,18 +994,10 @@ struct MidiPlayer : Module
                 event++;
                 time = midifile[track][event].seconds;
             }
-            time = params[SCRUB_PARAM].getValue();
             tempoMap.setMarkerTo(time);
             releaseHeldNotes();
         }
 
-
-        // Reset
-        if (resetTrigger.process(params[RESET_PARAM].getValue() + inputs[CV_RESET_INPUT].getVoltage()))
-        {
-            resetLight = 1.0f;
-            resetPlayer();
-        }
 
         // Run state button
         if (runningTrigger.process(params[RUN_PARAM].getValue() + inputs[CV_RUN_INPUT].getVoltage()))
@@ -1013,7 +1014,7 @@ struct MidiPlayer : Module
             if (loopStartPos >= 0) {
                 loopStartPos = -1;
             } else {
-                loopStartPos = time;
+                loopStartPos = tempoMap.timeMarker;
             }
         }
 
@@ -1022,12 +1023,12 @@ struct MidiPlayer : Module
             if (loopEndPos >= 0) {
                 loopEndPos = -1;
             } else {
-                loopEndPos = time;
+                loopEndPos = tempoMap.timeMarker;
             }
         }
 
         // Set looping
-        if (loopEndPos >= 0 && time > loopEndPos) {
+        if (loopEndPos >= 0 && tempoMap.timeMarker > loopEndPos) {
             endOfSectionPulse.trigger();
         }
 
@@ -1036,7 +1037,8 @@ struct MidiPlayer : Module
                 swap(loopStartPos, loopEndPos);
             }
 
-            if (running && loopEndPos >= 0 && time >= loopEndPos) {
+            if (running && loopEndPos >= 0 && tempoMap.timeMarker >= loopEndPos) {
+                double time = tempoMap.timeMarker;
                 while (time > loopStartPos && event > 0) {
                     event--;
                     time = midifile[track][event].seconds;
@@ -1047,7 +1049,9 @@ struct MidiPlayer : Module
         }
 
         applyParamsTimer -= args.sampleTime;
+        bool renderTempoText = false;
         if (applyParamsTimer <= 0.f) {
+            renderTempoText = true;
             applyParamsTimer = 0.2f;
             for (int i = trackOffset; i < (int)playbackTracks.size() && i < trackOffset + 16; i++) {
                 playbackTracks[i].midiCV.setChannels(clamp((int)params[MAX_CHANNELS + i - trackOffset].getValue(), 1, 16));
@@ -1056,16 +1060,11 @@ struct MidiPlayer : Module
         }
 
         if (running && fileLoaded) {
-            time += args.sampleTime;
-            if (tempoMap.process(args.sampleTime)) {
+            if (tempoMap.process(sampleTime)) {
                 clockPulse.trigger();
             }
 
-            if ( tempoMap.timeMarker != time ) {
-                tempoMap.setMarkerTo(time);
-            }
-
-            while (running && event < midifile[track].size() && time > midifile[track][event].seconds) {
+            while (running && event < midifile[track].size() && tempoMap.timeMarker > midifile[track][event].seconds) {
 
                 auto playbackTrack = std::find_if(playbackTracks.begin(), playbackTracks.end(), [this, track](const PlaybackTrack& playbackTrack) -> bool {
                         return playbackTrack.track == midifile[track][event].track && playbackTrack.channel == midifile[track][event].getChannelNibble();
@@ -1084,6 +1083,7 @@ struct MidiPlayer : Module
 
                 if (event >= midifile[track].size())
                 {
+                    double time = tempoMap.timeMarker;
                     if (params[LOOP_ON_OFF].getValue() < 0.5f) {
                         running = false;
                         event = 0;
@@ -1101,12 +1101,21 @@ struct MidiPlayer : Module
                     endOfSectionPulse.trigger();
                     releaseHeldNotes();
                     tempoMap.setMarkerTo(time);
+                    clockPulse.reset();
                     break;
                 }
             }
         }
 
-        params[SCRUB_PARAM].setValue(time);
+        if (renderTempoText) {
+            if (tempoMap.currentTempoEntry > -1 && tempoMap.currentTempoEntry < (int)tempoMap.tempoEntries.size()) {
+                tempoText = rack::string::f("%0.0f %0.1fx", 60.f / tempoMap.tempoEntries[tempoMap.currentTempoEntry].quarterNoteDurationInSeconds * tempoMultiplier, tempoMultiplier);
+            } else {
+                tempoText = rack::string::f("-- %0.1fx", tempoMultiplier);
+            }
+        }
+
+        params[SCRUB_PARAM].setValue(tempoMap.timeMarker);
 
         for (int i = trackOffset; i < (int)playbackTracks.size() && i < trackOffset + 16; i++) 
         {
@@ -1147,7 +1156,7 @@ struct MidiPlayer : Module
 
             // Reset light
             lights[RESET_LIGHT].value = resetLight;
-            resetLight -= (resetLight / lightLambda) * (float)sampleTime * displayRefreshStepSkips;
+            resetLight -= (resetLight / lightLambda) * (float)args.sampleTime * displayRefreshStepSkips;
 
             // Run light
             lights[RUN_LIGHT].value = running ? 1.0f : 0.0f;
@@ -1221,9 +1230,21 @@ struct MainDisplayWidget : TransparentWidget
 
 		nvgFillColor(args.vg, nvgRGBA(0x00, 0xff, 0x00, 0xff));
 		char text[128];
-		snprintf(text, sizeof(text), "%s / %s", formatTime(module->time).c_str(), formatTime(module->duration).c_str());
+		snprintf(text, sizeof(text), "%s / %s", formatTime(module->tempoMap.timeMarker).c_str(), formatTime(module->duration).c_str());
         nvgText(args.vg, pos.x, pos.y, text, NULL);
 	}
+
+    void drawTempo(const DrawArgs &args, Vec pos)
+    {
+        nvgFontSize(args.vg, 12);
+        nvgFontFaceId(args.vg, font->handle);
+        nvgTextLetterSpacing(args.vg, 0);
+
+        nvgFillColor(args.vg, nvgRGBA(0x00, 0xff, 0x00, 0xff));
+        char text[32];
+        snprintf(text, sizeof(text), "%s", module->tempoText.c_str());
+        nvgText(args.vg, pos.x, pos.y, text, NULL);
+    }
         
     std::string removeExtension(std::string filename)
     {
@@ -1242,6 +1263,8 @@ struct MainDisplayWidget : TransparentWidget
 
         drawTimer(args, Vec(19,65));
 
+        drawTempo(args, Vec(220,65));
+
         //cout << "Num Track " << module->playbackTracks.size() << endl;   
         for (int i = 0 + module->trackOffset; i < module->trackOffset + 8 && i < (int)module->playbackTracks.size(); i++)
         {
@@ -1255,38 +1278,7 @@ struct MainDisplayWidget : TransparentWidget
 
         
     }
-
-    /*   OLD draw()  display
-        NVGcolor backgroundColor = nvgRGB(0x38, 0x38, 0x38);
-        NVGcolor borderColor = nvgRGB(0x90, 0x90, 0x90);
-        nvgBeginPath(args.vg);
-        nvgRoundedRect(args.vg, 0.0, 0.0, 137, 23.5, 5.0);
-        nvgFillColor(args.vg, backgroundColor);
-        nvgFill(args.vg);
-        nvgStrokeWidth(args.vg, 1.0);
-        nvgStrokeColor(args.vg, borderColor);
-        nvgStroke(args.vg);
-        nvgFontSize(args.vg, 10);
-
-        //NVGcolor textColor = nvgRGB(0xaf, 0xd2, 0x2c);
-        nvgFontFaceId(args.vg, font->handle);
-        Vec textPos = Vec(5, 18);
-        nvgFillColor(args.vg, nvgRGBA(0xe1, 0x02, 0x78, 0xc0));
-        //std::string empty = std::string(displaySize, '~');
-        //nvgText(args.vg, textPos.x, textPos.y, "~", NULL);
-        nvgFillColor(args.vg, nvgRGBA(0x28, 0xb0, 0xf3, 0xc0));
-
-        for (int i = 0; i <= displaySize; i++)
-        {
-            text[i] = ' ';
-        }
-
-        snprintf(text, displaySize + 1, "%s", (removeExtension(module->lastFilename)).c_str());
         
-
-        nvgText(args.vg, textPos.x, textPos.y, text, NULL);
-    */   
-    
 };
 
 struct ClockMultiplierValueItem : MenuItem {
@@ -1294,7 +1286,7 @@ struct ClockMultiplierValueItem : MenuItem {
 	double clockMultiplier;
 	void onAction(const event::Action& e) override {
 		module->tempoMap.clockMultiplier = clockMultiplier;
-        module->tempoMap.setMarkerTo(module->time);
+        module->tempoMap.setMarkerTo(module->tempoMap.timeMarker);
 	}
 };
 
@@ -1324,6 +1316,7 @@ struct TrackOffsetValueItem : MenuItem {
         module->setTrackOffset(trackOffset);
 	}
 };
+
 
 struct TrackOffsetItem : MenuItem {
 	MidiPlayer* module;
@@ -1376,8 +1369,6 @@ struct MidiPlayerWidget : ModuleWidget
             display->box.pos = Vec(0, 0);
             display->box.size = Vec(box.size.x, 600); // x characters
             addChild(display);
-
-            //TrackDisplayWidget *namedisplay = new TrackDisplayWidget[i];
 
         }
 
@@ -1440,7 +1431,13 @@ struct MidiPlayerWidget : ModuleWidget
 
         addChild(createLightCentered<MediumLight<GreenLight>>(Vec(colRulerM0-colRulerMSpacing, rowRulerM0), module, MidiPlayer::EXTRA_TRACKS_LIGHT));
 
-    
+        // Tempo Knob
+        // sts_Davies_25_Grey
+        //auto tempoParam = createParamCentered<sts_Davies_25_Grey>(Vec(colRulerM0 - (colRulerMSpacing * 2), rowRulerM1 ), module, MidiPlayer::TEMPO_PARAM);
+        auto tempoParam = createParamCentered<sts_Davies_25_Grey>(Vec(240, rowRulerM1), module, MidiPlayer::TEMPO_PARAM);
+
+        tempoParam->smooth = true;
+        addParam(tempoParam);
 
         // channel outputs ( CV, GATE, VELOCITY, AFTERTOUCH, RE-TRIGGER)  Max Poly Knob,Mode Knob
         static const int colRulerOuts0 = 98;
