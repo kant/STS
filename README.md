@@ -1,3 +1,7 @@
+V1.1.2
+
+Added Tempo control to MidiPlayerplus.   Output clock follows tempo contol setting.
+
 V1.1.1
 
 Fixed SVG in Wavefolder module.
