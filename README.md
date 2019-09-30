@@ -1,7 +1,15 @@
+<<<<<<< HEAD
+=======
+V1.1.2
+
+Added Tempo control to MidiPlayerplus.   Output clock follows tempo contol setting.
+
+>>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
 V1.1.1
 
 Fixed SVG in Wavefolder module.
 
+<<<<<<< HEAD
 And  ............
 
 Introducing Midi Player, a collaboration between STS and RCM:
@@ -43,20 +51,69 @@ Second Row:
 1) "Clock out" is a clock out trigger to sync other sequencers to the Midi Player.  Right click context menu can select clock out multiplier.
 2, 3 4) CV inputs that go to the button above it.
 5) "EOC" is END OF CYCLE".  It is a CV output that sends  a trigger at the end of the play cycle for external syncing.
+=======
+And ............
+
+Introducing Midi Player, a collaboration between STS and RCM: Midi Player allows you play standard Midi Files in VCV rack. Unlimited tracks, with up to 16 VCV Channel Polyphony per track.
+
+![pack](/res/midiplayer.png?raw=true "pack")
+
+Load your file using the "Load File" button. The light will show green when the file is successfully loaded. Once you load a file, you will see the following in Green lettering:
+
+File name of your file.
+Time display for your file. It will update as file is playing.
+Track names as read from your file. If the track names are blank, your file does not have track names defined. Midi Player does not support General Midi (GM) at this time. If you can try looking at your file in a standalone Midi Player such as "Midi Editor", and looking under the "Channels" tab to see if there are General Midi manes for the tracks. Load VCV 'Notes" and write a list of the GM names for the tracks in your patch as a reference.
+Under the time display, you will have a "Scrub" horizontal slider that works the same as the Scrub knob In DAWs. It allows you to change position in your file by moving the slider back and forth.
+
+The 2 knobs, light, and 5 output ports name's are shortened to save on clutter. You will remember their function after your first use of Midi Player:
+
+"Po" knob is "Max Poly Channels". It is preset for the number of VCV channels in the track. The tooltip will show its present setting. It can be lowered, to wither save CPU use, or raised if you need more channels to play back properly in your present patch. This will rarely need to be adjusted from default.
+"Mm" knob is 'Midi Mode". It is defaulted to "Rotate", but can be changed is desired. Using "Reuse" works better when a channel contains a number if drums.
+The light is displayed Green if that track has content and Red if the track is blank. The next five are standard outputs:
+"Vo" is the "Volts per Octave" output for the track.
+"Ga" is the 'Gate' output for the track.
+"Ve" is "velocity" or volume of the notes in the track.
+"At' is "After Touch. It sends any Aftertouch modulation that is in the file.
+"Rt" is "ReTrigger". Sends a Re Trigger signal if needed.
+The Loop Start and End Buttons can be set by clicking on either button. The will set you start point or end point for playing back you Midi File, instead of using actual beginning and end of your file. If the "Loop" On/Off" button is lit, the file will playback between the selected loop points. If neither are lit, it will repeat from the beginning when it gets to the end of the file. Clicking on either button clears the state.
+
+Across the top of the module, you will see the following: 
+
+First Row:
+
+1) "16+ Tracks" Light. This will be lit if you file has more Tracks than will show in the module. Right clicking will bring up the context menu that allows you to select groups of tracks to display and play. Using more than 1 instance of Midi Player will allow you to play more than 16 tracks. Connect a output from a module, AS "Triggers MK III" is perfect for this, to both play and reset CV inputs to control multiple instances of Midi Player.
+
+2) "Load File" brings up the standard file selector to load your midi file.
+
+3) "Reset" button and CV input resets the stae to the same as when the file was newly loaded.
+
+4) "Run/Pause" button and CV input starts and stops the playback of your Midi File.
+
+5) "Loop On/Off" button and CV input, if button is lit, your file will start over when it gets to the endpoint. See 'Loop start and end" button description for more info.
+
+6) "Rtn to Start" CV input, when sent a high state from a trigger, returns your midi player to the beginning. 
+
+Second Row:
+
+1) "Clock out" is a clock out trigger to sync other sequencers to the Midi Player. Right click context menu can select clock out multiplier.
+ 
+2, 3, 4) CV inputs that go to the button above it.
+
+5) "EOC" is END OF CYCLE". It is a CV output that sends a trigger at the end of the play cycle for external syncing.
+
+
+
+>>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
 
 
 V1.0.4
 
-On PolySEQ16:
-Fixed row 4 Octave control
+On PolySEQ16: Fixed row 4 Octave control
 
-on LFOPoly:
-added variable phase control per LFO.
-2 versions now:
-1) LFOPoly has continuous control of each LFO's pahse, -180 degrees to +180 degrees
-2) LFOPolySP has Knob 'snapped' to 30 degree increment on each LFO's phase, -180 degrees to +180 degrees.  Let me know if you nee 15 degree increments.
-Will combine into 1 module is get enough requests.
+on LFOPoly: added variable phase control per LFO. 2 versions now:
 
+LFOPoly has continuous control of each LFO's pahse, -180 degrees to +180 degrees
+LFOPolySP has Knob 'snapped' to 30 degree increment on each LFO's phase, -180 degrees to +180 degrees. Let me know if you nee 15 degree increments. Will combine into 1 module is get enough requests.
 If you need separate outputs per LFO, use VCV SPLIT.
 
 Minor fixes on displays on all modules
@@ -69,22 +126,19 @@ on Oddy: (previously Oddyssey)
 
 Lowered CPU ude on Oddy some more.
 
-Finalized 4 waveforms available on VCOs and LFO.  Waveforms can be morphed using CV inputs.
-
+Finalized 4 waveforms available on VCOs and LFO. Waveforms can be morphed using CV inputs.
 
 On PolySEQ16:
 
-  Misc Small fixes, including cleaned up and aligning interface layout,
-  
-  Added different step setting for each row.
-  
-  Tool tip for knobs now shows note letter.
-  
-  Added menu item for changing knobs from 'snapped to semitones' to 'continious'.
-  
-  Added separate 'index' lights per row.
-  
-  
+Misc Small fixes, including cleaned up and aligning interface layout,
+
+Added different step setting for each row.
+
+Tool tip for knobs now shows note letter.
+
+Added menu item for changing knobs from 'snapped to semitones' to 'continious'.
+
+Added separate 'index' lights per row.
 
 V1.0.2
 
@@ -93,9 +147,6 @@ Added LFOPoly
 Added label for channel on/off SEQ16 (ooops)
 
 Lowered CPU use on Oddy Poly.
-
- 
-
 
 Here is the V1 list so far. Documentation to follow.....
 
@@ -111,9 +162,7 @@ Ring Modulator: Orphaned module from JE ported to V1. Will be POLY at a later da
 
 Wave Folder: Orphaned module from JE ported to V1. Will be POLY at a later date.
 
-LFOPoly:  16 channel LFO for polyphonic modulation.   Independent Frequency, Waveshape, ans Pule Width per LFO. Polyphonic CV inputs for Frequency, Waveshape, and Pule Width, along with Reset trigger input
-
-
+LFOPoly: 16 channel LFO for polyphonic modulation. Independent Frequency, Waveshape, ans Pule Width per LFO. Polyphonic CV inputs for Frequency, Waveshape, and Pule Width, along with Reset trigger input
 
 VCV Rack modules for V6.2.
 

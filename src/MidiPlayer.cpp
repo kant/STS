@@ -1060,7 +1060,11 @@ struct MidiPlayer : Module
         }
 
         if (running && fileLoaded) {
+<<<<<<< HEAD
             if (tempoMap.process(sampleTime)) {
+=======
+            if (tempoMap.process(args.sampleTime)) {
+>>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
                 clockPulse.trigger();
             }
 
@@ -1107,6 +1111,7 @@ struct MidiPlayer : Module
             }
         }
 
+<<<<<<< HEAD
         if (renderTempoText) {
             if (tempoMap.currentTempoEntry > -1 && tempoMap.currentTempoEntry < (int)tempoMap.tempoEntries.size()) {
                 tempoText = rack::string::f("%0.0f %0.1fx", 60.f / tempoMap.tempoEntries[tempoMap.currentTempoEntry].quarterNoteDurationInSeconds * tempoMultiplier, tempoMultiplier);
@@ -1115,6 +1120,8 @@ struct MidiPlayer : Module
             }
         }
 
+=======
+>>>>>>> 1af8a927e7e43b0e7b835ea001d985155d8ce09c
         params[SCRUB_PARAM].setValue(tempoMap.timeMarker);
 
         for (int i = trackOffset; i < (int)playbackTracks.size() && i < trackOffset + 16; i++) 
