@@ -19,7 +19,7 @@ Load your file using the "Load File" button.  The light will show green when the
 Once you load a file, you will see the following in Green lettering:
 1) File name of your file.
 2) Time display for your file.  It will update as file is playing.
-3) Track names as read from your file.  If the track names are blank, your file does not have track names defined. Midi Player does not support General Midi (GM) at this time. If you can try looking at your file in a standalone Midi Player such as "Midi Editor", and looking under the "Channels" tab to see if there are General Midi manes for the tracks.  Load VCV 'Notes" and write a list of the GM names for the tracks in your patch as a reference.
+3) Track names as read from your file.  If the track names are blank, your file does not have track names defined. Midi Player does not support General Midi (GM) at this time. If you can try looking at your file in a standalone Midi Player such as "Midi Editor", and looking under the "Channels" tab to see if there are General Midi names for the tracks.  Load VCV 'Notes" and write a list of the GM names for the tracks in your patch as a reference.
  
 Under the time display, you will have a "Scrub" horizontal slider that works the same as the Scrub knob In DAWs.  It allows you to change position in your file by moving the slider back and forth. 
 
@@ -40,7 +40,7 @@ Across the top of the module, you will see the following:
 First Row:
 1) "16+ Tracks" Light.  This will be lit if you file has more Tracks than will show in the module. Right clicking will bring up the context menu that allows you to select groups of tracks to display and play.  Using more than 1 instance of Midi Player will allow you to play more than 16 tracks.  Connect a output from a module,  AS "Triggers MK III" is perfect for this,  to both play and reset CV inputs to control multiple instances of Midi Player.
 2) "Load File" brings up the standard file selector to load your midi file.
-3) "Reset" button and CV input resets the stae to the same as when the file was newly loaded.
+3) "Reset" button and CV input resets the state to the same as when the file was newly loaded.
 4) "Run/Pause" button and CV input starts and stops the playback of your Midi File.
 5) "Loop On/Off" button and CV input, if button is lit, your file will start over when it gets to the endpoint.  See 'Loop start and end" button description for more info.
 6) "Rtn to Start" CV input, when sent a high state from a trigger, returns your midi player to the beginning.
@@ -59,7 +59,7 @@ Load your file using the "Load File" button. The light will show green when the 
 
 File name of your file.
 Time display for your file. It will update as file is playing.
-Track names as read from your file. If the track names are blank, your file does not have track names defined. Midi Player does not support General Midi (GM) at this time. If you can try looking at your file in a standalone Midi Player such as "Midi Editor", and looking under the "Channels" tab to see if there are General Midi manes for the tracks. Load VCV 'Notes" and write a list of the GM names for the tracks in your patch as a reference.
+Track names as read from your file. If the track names are blank, your file does not have track names defined. Midi Player does not support General Midi (GM) at this time. If you can try looking at your file in a standalone Midi Player such as "Midi Editor", and looking under the "Channels" tab to see if there are General Midi names for the tracks. Load VCV 'Notes" and write a list of the GM names for the tracks in your patch as a reference.
 Under the time display, you will have a "Scrub" horizontal slider that works the same as the Scrub knob In DAWs. It allows you to change position in your file by moving the slider back and forth.
 
 The 2 knobs, light, and 5 output ports name's are shortened to save on clutter. You will remember their function after your first use of Midi Player:
